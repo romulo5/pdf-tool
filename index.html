@@ -549,7 +549,8 @@
             folderInput.value = '';
         });
 
-        async function handleFiles(files) {
+        async function handleFiles(fileList) {
+            const files = Array.from(fileList);
             for (const file of files) {
                 if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) continue;
                 try {
