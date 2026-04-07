@@ -285,10 +285,12 @@
             <span class="drop-zone-icon">&#128196;</span>
             <p class="drop-zone-text">
                 Arraste e solte arquivos PDF aqui<br>
-                ou <strong>clique para escolher</strong>
+                <strong id="pickFiles">clique para escolher arquivos</strong>
+                ou <strong id="pickFolder">escolher uma pasta inteira</strong>
             </p>
         </div>
         <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+        <input type="file" id="folderInput" webkitdirectory hidden>
 
         <ul class="file-list" id="fileList"></ul>
 
@@ -328,6 +330,9 @@
 
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
+        const folderInput = document.getElementById('folderInput');
+        const pickFiles = document.getElementById('pickFiles');
+        const pickFolder = document.getElementById('pickFolder');
         const fileList = document.getElementById('fileList');
         const mergeBtn = document.getElementById('mergeBtn');
         const clearBtn = document.getElementById('clearBtn');
@@ -341,6 +346,8 @@
         const actionsBar = document.getElementById('actionsBar');
 
         // Drop zone events
+        pickFiles.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
+        pickFolder.addEventListener('click', e => { e.stopPropagation(); folderInput.click(); });
         dropZone.addEventListener('click', () => fileInput.click());
         dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
@@ -353,10 +360,14 @@
             handleFiles(e.target.files);
             fileInput.value = '';
         });
+        folderInput.addEventListener('change', e => {
+            handleFiles(e.target.files);
+            folderInput.value = '';
+        });
 
         async function handleFiles(files) {
             for (const file of files) {
-                if (file.type !== 'application/pdf') continue;
+                if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) continue;
                 try {
                     const bytes = new Uint8Array(await file.arrayBuffer());
                     const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
