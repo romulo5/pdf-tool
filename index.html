@@ -4,74 +4,143 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lindinha's PDF</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #fdf2f8 0%, #ede9fe 50%, #e0f2fe 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
-            color: #333;
+            padding: 48px 20px;
+            color: #334155;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #ec4899, #a855f7);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 14px rgba(168, 85, 247, 0.3);
         }
 
         h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1a1a2e;
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
-            color: #666;
-            margin-bottom: 32px;
+            color: #94a3b8;
+            margin-bottom: 36px;
             font-size: 15px;
+            font-weight: 400;
         }
 
         .container {
             width: 100%;
-            max-width: 700px;
+            max-width: 640px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
         }
 
         .drop-zone {
-            border: 2px dashed #b0b8c8;
-            border-radius: 16px;
-            padding: 48px 24px;
+            border: 2px dashed #d4d4e0;
+            border-radius: 20px;
+            padding: 52px 24px;
             text-align: center;
-            background: #fff;
+            background: linear-gradient(135deg, #fefce8 0%, #fdf4ff 50%, #eff6ff 100%);
             cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(168, 85, 247, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .drop-zone:hover::before, .drop-zone.drag-over::before {
+            opacity: 1;
         }
 
         .drop-zone:hover, .drop-zone.drag-over {
-            border-color: #4a6cf7;
-            background: #f0f4ff;
+            border-color: #c084fc;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.12);
         }
 
         .drop-zone-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
+            font-size: 52px;
+            margin-bottom: 16px;
             display: block;
+            position: relative;
         }
 
         .drop-zone-text {
-            font-size: 16px;
-            color: #555;
+            font-size: 15px;
+            color: #64748b;
+            line-height: 2;
+            position: relative;
         }
 
         .drop-zone-text strong {
-            color: #4a6cf7;
+            color: #a855f7;
             cursor: pointer;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .drop-zone-text strong:hover {
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        .drop-zone-divider {
+            display: inline-block;
+            color: #cbd5e1;
+            margin: 0 4px;
+            font-weight: 400;
         }
 
         .file-list {
             list-style: none;
-            margin-bottom: 24px;
+            margin: 24px 0;
         }
 
         .file-list:empty {
@@ -82,153 +151,181 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
+            padding: 14px 16px;
             background: #fff;
-            border-radius: 10px;
+            border-radius: 14px;
             margin-bottom: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            border: 1px solid #f1f5f9;
             cursor: grab;
             user-select: none;
-            transition: box-shadow 0.15s, transform 0.15s;
+            transition: all 0.2s ease;
+        }
+
+        .file-item:hover {
+            border-color: #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         .file-item:active { cursor: grabbing; }
 
         .file-item.dragging {
-            opacity: 0.5;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transform: scale(1.02);
+            opacity: 0.4;
+            transform: scale(0.98);
         }
 
         .file-item.drag-target {
-            border-top: 3px solid #4a6cf7;
+            border-top: 3px solid #a855f7;
+            margin-top: -3px;
         }
 
         .drag-handle {
-            color: #aab;
-            font-size: 18px;
+            color: #cbd5e1;
+            font-size: 16px;
             flex-shrink: 0;
             cursor: grab;
+            transition: color 0.2s;
+        }
+
+        .file-item:hover .drag-handle { color: #a855f7; }
+
+        .file-number {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #ec4899, #a855f7);
+            width: 24px;
+            height: 24px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         .file-name {
             flex: 1;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 500;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            color: #475569;
         }
 
         .file-pages {
-            font-size: 12px;
-            color: #888;
+            font-size: 11px;
+            color: #94a3b8;
             flex-shrink: 0;
+            background: #f8fafc;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
         }
 
         .file-remove {
             background: none;
             border: none;
-            color: #cc4444;
-            font-size: 18px;
+            color: #e2e8f0;
+            font-size: 20px;
             cursor: pointer;
             padding: 2px 6px;
-            border-radius: 4px;
+            border-radius: 8px;
             flex-shrink: 0;
+            transition: all 0.2s;
+            line-height: 1;
         }
 
         .file-remove:hover {
-            background: #fee;
+            background: #fef2f2;
+            color: #ef4444;
         }
 
-        .file-number {
+        .options-section {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .options-section label {
             font-size: 13px;
-            font-weight: 600;
-            color: #4a6cf7;
-            min-width: 20px;
-            text-align: center;
-            flex-shrink: 0;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+
+        .options-section select {
+            padding: 8px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            color: #475569;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .options-section select:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
         }
 
         .actions {
             display: flex;
             gap: 12px;
             justify-content: center;
-            flex-wrap: wrap;
+            margin-top: 24px;
         }
 
         .btn {
-            padding: 14px 32px;
+            padding: 14px 28px;
             border: none;
-            border-radius: 10px;
-            font-size: 15px;
+            border-radius: 14px;
+            font-size: 14px;
             font-weight: 600;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
+            letter-spacing: -0.2px;
         }
 
         .btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
+            transform: none !important;
         }
 
         .btn-primary {
-            background: #4a6cf7;
+            background: linear-gradient(135deg, #ec4899, #a855f7);
             color: #fff;
+            box-shadow: 0 4px 14px rgba(168, 85, 247, 0.3);
         }
 
         .btn-primary:hover:not(:disabled) {
-            background: #3a5ce5;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
         }
 
-        .btn-danger {
+        .btn-secondary {
             background: #fff;
-            color: #cc4444;
-            border: 1px solid #e0e0e0;
+            color: #94a3b8;
+            border: 1px solid #e2e8f0;
         }
 
-        .btn-danger:hover:not(:disabled) {
+        .btn-secondary:hover:not(:disabled) {
+            color: #ef4444;
+            border-color: #fecaca;
             background: #fff5f5;
-        }
-
-        .options {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
-        .option-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #fff;
-            padding: 10px 16px;
-            border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        }
-
-        .option-group label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #555;
-        }
-
-        .option-group select, .option-group input {
-            padding: 4px 8px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 13px;
         }
 
         .progress-bar {
             width: 100%;
-            height: 6px;
-            background: #e0e0e0;
-            border-radius: 3px;
-            margin-bottom: 24px;
+            height: 4px;
+            background: #f1f5f9;
+            border-radius: 2px;
+            margin: 20px 0;
             overflow: hidden;
             display: none;
         }
@@ -237,65 +334,107 @@
 
         .progress-fill {
             height: 100%;
-            background: #4a6cf7;
-            border-radius: 3px;
-            transition: width 0.3s;
+            background: linear-gradient(90deg, #ec4899, #a855f7);
+            border-radius: 2px;
+            transition: width 0.3s ease;
             width: 0%;
         }
 
         .status {
             text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 16px;
+            font-size: 13px;
+            color: #94a3b8;
             min-height: 20px;
+            font-weight: 500;
         }
 
         .result {
             text-align: center;
-            padding: 20px;
-            background: #f0faf0;
-            border-radius: 12px;
-            margin-top: 16px;
+            padding: 24px;
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border: 1px solid #bbf7d0;
+            border-radius: 16px;
+            margin-top: 20px;
             display: none;
         }
 
         .result.active { display: block; }
 
         .result a {
-            color: #2a8c4a;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            padding: 12px 24px;
+            border-radius: 12px;
             font-weight: 600;
             text-decoration: none;
-            font-size: 16px;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+        }
+
+        .result a:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.35);
+        }
+
+        .result a::before {
+            content: '\2913';
+            font-size: 18px;
         }
 
         .result .size-info {
-            font-size: 13px;
-            color: #666;
-            margin-top: 6px;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .file-count {
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: -16px;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .file-count:empty { display: none; }
+
+        footer {
+            margin-top: 48px;
+            font-size: 12px;
+            color: #cbd5e1;
         }
     </style>
 </head>
 <body>
-    <h1>Lindinha's PDF</h1>
+    <div class="logo">
+        <div class="logo-icon">&#128156;</div>
+        <h1>Lindinha's PDF</h1>
+    </div>
     <p class="subtitle">Solte seus PDFs, arraste para reordenar e junte tudo.</p>
 
     <div class="container">
-        <div class="drop-zone" id="dropZone">
-            <span class="drop-zone-icon">&#128196;</span>
-            <p class="drop-zone-text">
-                Arraste e solte arquivos PDF aqui<br>
-                <strong id="pickFiles">clique para escolher arquivos</strong>
-                ou <strong id="pickFolder">escolher uma pasta inteira</strong>
-            </p>
-        </div>
-        <input type="file" id="fileInput" accept=".pdf" multiple hidden>
-        <input type="file" id="folderInput" webkitdirectory hidden>
+        <div class="card">
+            <div class="drop-zone" id="dropZone">
+                <span class="drop-zone-icon">&#128462;</span>
+                <p class="drop-zone-text">
+                    Arraste e solte arquivos PDF aqui<br>
+                    <strong id="pickFiles">Escolher arquivos</strong>
+                    <span class="drop-zone-divider">ou</span>
+                    <strong id="pickFolder">Escolher pasta inteira</strong>
+                </p>
+            </div>
+            <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+            <input type="file" id="folderInput" webkitdirectory hidden>
 
-        <ul class="file-list" id="fileList"></ul>
+            <p class="file-count" id="fileCount"></p>
+            <ul class="file-list" id="fileList"></ul>
 
-        <div class="options" id="optionsBar" style="display:none;">
-            <div class="option-group">
+            <div class="options-section" id="optionsBar" style="display:none;">
                 <label for="quality">Compactar:</label>
                 <select id="quality">
                     <option value="none">Nenhuma (manter original)</option>
@@ -304,28 +443,30 @@
                     <option value="heavy">Forte (menor arquivo)</option>
                 </select>
             </div>
-        </div>
 
-        <div class="progress-bar" id="progressBar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <p class="status" id="status"></p>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p class="status" id="status"></p>
 
-        <div class="actions" id="actionsBar" style="display:none;">
-            <button class="btn btn-danger" id="clearBtn">Limpar Tudo</button>
-            <button class="btn btn-primary" id="mergeBtn">Juntar e Compactar</button>
-        </div>
+            <div class="actions" id="actionsBar" style="display:none;">
+                <button class="btn btn-secondary" id="clearBtn">Limpar Tudo</button>
+                <button class="btn btn-primary" id="mergeBtn">Juntar e Compactar</button>
+            </div>
 
-        <div class="result" id="result">
-            <a id="downloadLink" href="#" download="lindinha-merged.pdf">Baixar PDF Final</a>
-            <p class="size-info" id="sizeInfo"></p>
+            <div class="result" id="result">
+                <a id="downloadLink" href="#" download="lindinha-merged.pdf">Baixar PDF Final</a>
+                <p class="size-info" id="sizeInfo"></p>
+            </div>
         </div>
     </div>
+
+    <footer>Tudo acontece no seu navegador. Nenhum arquivo sai do seu computador.</footer>
 
     <script>
         const { PDFDocument } = PDFLib;
 
-        let pdfFiles = []; // { file, name, pageCount, bytes }
+        let pdfFiles = [];
         let dragSrcIndex = null;
 
         const dropZone = document.getElementById('dropZone');
@@ -334,6 +475,7 @@
         const pickFiles = document.getElementById('pickFiles');
         const pickFolder = document.getElementById('pickFolder');
         const fileList = document.getElementById('fileList');
+        const fileCount = document.getElementById('fileCount');
         const mergeBtn = document.getElementById('mergeBtn');
         const clearBtn = document.getElementById('clearBtn');
         const progressBar = document.getElementById('progressBar');
@@ -345,7 +487,6 @@
         const optionsBar = document.getElementById('optionsBar');
         const actionsBar = document.getElementById('actionsBar');
 
-        // Drop zone events
         pickFiles.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
         pickFolder.addEventListener('click', e => { e.stopPropagation(); folderInput.click(); });
         dropZone.addEventListener('click', () => fileInput.click());
@@ -390,6 +531,13 @@
             optionsBar.style.display = show ? 'flex' : 'none';
             actionsBar.style.display = show ? 'flex' : 'none';
 
+            if (show) {
+                const totalPages = pdfFiles.reduce((s, f) => s + f.pageCount, 0);
+                fileCount.textContent = `${pdfFiles.length} arquivo${pdfFiles.length > 1 ? 's' : ''} \u00b7 ${totalPages} pagina${totalPages > 1 ? 's' : ''}`;
+            } else {
+                fileCount.textContent = '';
+            }
+
             pdfFiles.forEach((pdf, i) => {
                 const li = document.createElement('li');
                 li.className = 'file-item';
@@ -409,7 +557,6 @@
                     renderList();
                 });
 
-                // Drag reorder
                 li.addEventListener('dragstart', e => {
                     dragSrcIndex = i;
                     li.classList.add('dragging');
@@ -484,7 +631,6 @@
                     saveOptions.objectsPerTick = 20;
                 }
 
-                // Remove metadata for extra compression
                 if (quality !== 'none') {
                     merged.setTitle('');
                     merged.setAuthor('');
