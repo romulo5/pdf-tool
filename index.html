@@ -392,16 +392,51 @@
             font-weight: 500;
         }
 
+        .file-toolbar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0 12px;
+        }
+
+        .file-toolbar.active { display: flex; }
+
         .file-count {
-            text-align: center;
             font-size: 12px;
             color: #94a3b8;
-            margin-top: -16px;
-            margin-bottom: 16px;
             font-weight: 500;
         }
 
-        .file-count:empty { display: none; }
+        .btn-ghost {
+            background: none;
+            border: 1px solid #e2e8f0;
+            color: #94a3b8;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-ghost:hover {
+            border-color: #c084fc;
+            color: #a855f7;
+            background: rgba(168, 85, 247, 0.04);
+        }
+
+        .btn-ghost .sort-arrow {
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .btn-ghost.desc .sort-arrow {
+            transform: rotate(180deg);
+        }
 
         footer {
             margin-top: 48px;
@@ -431,7 +466,12 @@
             <input type="file" id="fileInput" accept=".pdf" multiple hidden>
             <input type="file" id="folderInput" webkitdirectory hidden>
 
-            <p class="file-count" id="fileCount"></p>
+            <div class="file-toolbar" id="fileToolbar">
+                <span class="file-count" id="fileCount"></span>
+                <button class="btn-ghost" id="sortBtn" title="Ordenar por nome">
+                    <span class="sort-arrow">&#8595;</span> Ordenar A-Z
+                </button>
+            </div>
             <ul class="file-list" id="fileList"></ul>
 
             <div class="options-section" id="optionsBar" style="display:none;">
@@ -468,6 +508,7 @@
 
         let pdfFiles = [];
         let dragSrcIndex = null;
+        let sortAsc = true;
 
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
@@ -475,7 +516,9 @@
         const pickFiles = document.getElementById('pickFiles');
         const pickFolder = document.getElementById('pickFolder');
         const fileList = document.getElementById('fileList');
+        const fileToolbar = document.getElementById('fileToolbar');
         const fileCount = document.getElementById('fileCount');
+        const sortBtn = document.getElementById('sortBtn');
         const mergeBtn = document.getElementById('mergeBtn');
         const clearBtn = document.getElementById('clearBtn');
         const progressBar = document.getElementById('progressBar');
@@ -531,11 +574,10 @@
             optionsBar.style.display = show ? 'flex' : 'none';
             actionsBar.style.display = show ? 'flex' : 'none';
 
+            fileToolbar.classList.toggle('active', show);
             if (show) {
                 const totalPages = pdfFiles.reduce((s, f) => s + f.pageCount, 0);
                 fileCount.textContent = `${pdfFiles.length} arquivo${pdfFiles.length > 1 ? 's' : ''} \u00b7 ${totalPages} pagina${totalPages > 1 ? 's' : ''}`;
-            } else {
-                fileCount.textContent = '';
             }
 
             pdfFiles.forEach((pdf, i) => {
@@ -590,6 +632,19 @@
             pdfFiles = [];
             result.classList.remove('active');
             status.textContent = '';
+            renderList();
+        });
+
+        sortBtn.addEventListener('click', () => {
+            pdfFiles.sort((a, b) => {
+                const cmp = a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base', numeric: true });
+                return sortAsc ? cmp : -cmp;
+            });
+            sortBtn.innerHTML = sortAsc
+                ? '<span class="sort-arrow">&#8593;</span> Ordenar Z-A'
+                : '<span class="sort-arrow">&#8595;</span> Ordenar A-Z';
+            sortBtn.classList.toggle('desc', sortAsc);
+            sortAsc = !sortAsc;
             renderList();
         });
 
